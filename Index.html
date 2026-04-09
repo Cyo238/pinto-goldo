@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pinto bajando de peso</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      font-family: Arial;
+    }
+    canvas {
+      display: block;
+      background: linear-gradient(#222, #000);
+    }
+  </style>
+</head>
+<body>
+<canvas id="game"></canvas><script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let gravity = 0.6;
+let player = {
+  x: 100,
+  y: 300,
+  width: 20,
+  height: 50,
+  dy: 0,
+  jumping: false
+};
+
+let platforms = [
+  {x: 0, y: 400, width: 300, height: 20},
+  {x: 350, y: 350, width: 200, height: 20},
+  {x: 600, y: 300, width: 200, height: 20},
+  {x: 850, y: 250, width: 200, height: 20}
+];
+
+function drawStickman(p) {
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 2;
+
+  // cabeza
+  ctx.beginPath();
+  ctx.arc(p.x + 10, p.y - 10, 10, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // cuerpo
+  ctx.beginPath();
+  ctx.moveTo(p.x + 10, p.y);
+  ctx.lineTo(p.x + 10, p.y + 25);
+  ctx.stroke();
+
+  // brazos
+  ctx.beginPath();
+  ctx.moveTo(p.x + 10, p.y + 10);
+  ctx.lineTo(p.x - 5, p.y + 20);
+  ctx.moveTo(p.x + 10, p.y + 10);
+  ctx.lineTo(p.x + 25, p.y + 20);
+  ctx.stroke();
+
+  // piernas
+  ctx.beginPath();
+  ctx.moveTo(p.x + 10, p.y + 25);
+  ctx.lineTo(p.x - 5, p.y + 45);
+  ctx.moveTo(p.x + 10, p.y + 25);
+  ctx.lineTo(p.x + 25, p.y + 45);
+  ctx.stroke();
+
+  // nombre encima
+  ctx.fillStyle = "white";
+  ctx.font = "14px Arial";
+  ctx.fillText("pinto vrg", p.x - 20, p.y - 30);
+}
+
+function update() {
+  player.dy += gravity;
+  player.y += player.dy;
+
+  // colisiones
+  player.jumping = true;
+  for (let plat of platforms) {
+    if (
+      player.x < plat.x + plat.width &&
+      player.x + player.width > plat.x &&
+      player.y + player.height < plat.y + 10 &&
+      player.y + player.height + player.dy >= plat.y
+    ) {
+      player.y = plat.y - player.height;
+      player.dy = 0;
+      player.jumping = false;
+    }
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // plataformas
+  ctx.fillStyle = "#0f0";
+  for (let plat of platforms) {
+    ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+  }
+
+  drawStickman(player);
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+// controles
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && !player.jumping) {
+    player.dy = -12;
+  }
+  if (e.code === "ArrowRight") {
+    player.x += 20;
+  }
+  if (e.code === "ArrowLeft") {
+    player.x -= 20;
+  }
+});
+
+gameLoop();
+</script></body>
+</html>
